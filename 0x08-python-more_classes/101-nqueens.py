@@ -1,63 +1,90 @@
 #!/usr/bin/python3
 from sys import argv
 
-"""
-This modules finds all solutions for N queens problem
-"""
+
+class Chessboard:
+    """Represents a chessboard."""
+    def __init__(self, size):
+        """Initialize the data."""
+        self.size = size
+        self.cols = []
+
+    def place_in_next_row(self, col):
+        """Place in next row."""
+        self.cols.append(col)
+
+    def remove_in_current_row(self):
+        """Remove in current row."""
+        return self.cols.pop()
+
+    def next_row_safe(self, col):
+        """Check if current col in the next row is safe."""
+        row = len(self.cols)
+        for q_col in self.cols:
+            if col == q_col:
+                return False
+
+        for q_row, q_col in enumerate(self.cols):
+            if q_col - q_row == col - row:
+                return False
+
+        for q_row, q_col in enumerate(self.cols):
+            if self.size - q_col - q_row == self.size - col - row:
+                return False
+
+        return True
+
+    def display(self):
+        """Display a valid solution."""
+        print('[', end='')
+        for row in range(self.size):
+            for col in range(self.size):
+                if col == self.cols[row]:
+                    print('[{}, {}]'.format(row, col), end='')
+                    if row < self.size - 1:
+                        print(', ', end='')
+        print(']')
 
 
-class Queen:
-    """
-    Class defined as Queen to solve nQueens problem
-    using recursion
-    """
-    def can_move(self, x, y, right):
+def solve(size):
+    """Solve the N queens problem."""
+    board = Chessboard(size)
+    row = col = 0
+    while True:
+        while col < size:
+            if board.next_row_safe(col):
+                board.place_in_next_row(col)
+                row += 1
+                col = 0
+                break
+            else:
+                col += 1
 
-        """
-        Function to see if queen can move in the vaild constraint
-        column provided
-        """
-        for a in range(x):
-            if right[a] == y:
-                return (False)
-            if abs(right[a] - y) == (x - a):
-                return (False)
-        return (True)
+        if col == size or row == size:
+            if row == size:
+                board.display()
+                board.remove_in_current_row()
+                row -= 1
 
-    def solution(self, n, N, right):
-        """
-        function to find all the right combos that can happen
-        using recursion.
-        """
-        if n == N:
-            print("[", end="")
-            for j in range(N):
-                print("[{}, {}]".format(j, right[j]), end="")
-                if j < N - 1:
-                    print(", ", end="")
-            print("]")
-            return
+            try:
+                prev_col = board.remove_in_current_row()
+            except IndexError:
+                break
 
-        for j in range(N):
-            if self.can_move(n, j, right):
-                right[n] = j
-                self.solution(n + 1, N, right)
+            row -= 1
+            col = 1 + prev_col
 
-if __name__ == "__main__":
-    count = len(argv)
 
-    if count != 2:
-        print("Usage: nqueens N")
-        exit(1)
-    else:
-        try:
-            N = int(argv[1])
-        except:
-            print("N must be a number")
-            exit(1)
-    if N < 4:
-        print("N must be at least 4")
-        exit(1)
+if len(argv) != 2:
+    print('Usage: nqueens N')
+    exit(1)
+try:
+    queens = int(argv[1])
+except ValueError:
+    print('N must be a number')
+    exit(1)
+if queens < 4:
+    print('N must be at least 4')
+    exit(1)
 
-    final = Queen()
-    final.solution(0, N, [None for i in range(N)])
+solve(queens)
