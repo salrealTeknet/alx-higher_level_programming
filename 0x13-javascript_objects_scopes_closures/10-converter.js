@@ -5,5 +5,3 @@ exports.converter = function (base) {
     return (num.toString(base));
   };
 };
-Footer
-© 2022 GitHu
